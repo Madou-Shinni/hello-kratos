@@ -1,5 +1,9 @@
 # kratos-go
 
+## 集成 asynq 作为消息队列
+
+[README.md](internal%2Fserver%2FREADME.md)
+
 ## 自定义响应方式
 
 官方文档：https://go-kratos.dev/docs/component/transport/http

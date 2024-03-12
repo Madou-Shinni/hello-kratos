@@ -81,3 +81,8 @@ help:
 	{ lastLine = $$0 }' $(MAKEFILE_LIST)
 
 .DEFAULT_GOAL := help
+
+.PHONY: wire
+# generate wire
+wire:
+	cd ./cmd/helloword && wire
