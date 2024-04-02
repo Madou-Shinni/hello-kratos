@@ -1,0 +1,67 @@
+swagger: "2.0"
+info:
+  title: hello-kratos
+  version: "1.0"
+tags:
+  - name: Greeter
+schemes:
+  - http
+  - https
+consumes:
+  - application/json
+produces:
+  - application/json
+paths:
+  /helloworld/{name}:
+    get:
+      summary: helloword
+      operationId: Greeter_SayHello
+      responses:
+        "200":
+          description: A successful response.
+          schema:
+            $ref: '#/definitions/v1HelloReply'
+        default:
+          description: An unexpected error response.
+          schema:
+            $ref: '#/definitions/rpcStatus'
+      parameters:
+        - name: name
+          description: 名称
+          in: path
+          required: true
+          type: string
+      tags:
+        - hello-kratos
+definitions:
+  protobufAny:
+    type: object
+    properties:
+      '@type':
+        type: string
+    additionalProperties: {}
+  rpcStatus:
+    type: object
+    properties:
+      code:
+        type: integer
+        format: int32
+      message:
+        type: string
+      details:
+        type: array
+        items:
+          type: object
+          $ref: '#/definitions/protobufAny'
+  v1HelloReply:
+    type: object
+    properties:
+      message:
+        type: string
+    title: The response message containing the greetings
+securityDefinitions:
+  TokenAuth:
+    type: apiKey
+    description: '用户认证,格式为: Bearer+空格+token'
+    name: Authorization
+    in: header

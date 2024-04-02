@@ -3,11 +3,32 @@ syntax = "proto3";
 package helloworld.v1;
 
 import "google/api/annotations.proto";
+import "protoc-gen-openapiv2/options/annotations.proto";
 
 option go_package = "helloword/api/helloworld/v1;v1";
 option java_multiple_files = true;
 option java_package = "dev.kratos.api.helloworld.v1";
 option java_outer_classname = "HelloworldProtoV1";
+
+option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_swagger) = {
+  info : {
+    title : "hello-kratos";
+    version : "1.0";
+  };
+  schemes : HTTP;
+  schemes : HTTPS;
+  security_definitions : {
+    security : {
+      key: "TokenAuth";
+      value: {
+        type: TYPE_API_KEY;
+        in: IN_HEADER;
+        name: "Authorization";
+        description: "用户认证,格式为: Bearer+空格+token";
+      }
+    };
+  };
+};
 
 // The greeting service definition.
 service Greeter {
@@ -16,12 +37,17 @@ service Greeter {
     option (google.api.http) = {
       get: "/helloworld/{name}"
     };
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "helloword";
+      tags: ["hello-kratos"];
+    };
   }
 }
 
 // The request message containing the user's name.
 message HelloRequest {
-  string name = 1;
+  string name = 1; // 名称
 }
 
 // The response message containing the greetings

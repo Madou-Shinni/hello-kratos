@@ -4,6 +4,10 @@
 
 [README.md](internal%2Fserver%2FREADME.md)
 
+## 根据proto文件输出swagger
+
+[README_swagger.md](doc%2FREADME_swagger.md)
+
 ## 自定义响应方式
 
 官方文档：https://go-kratos.dev/docs/component/transport/http
