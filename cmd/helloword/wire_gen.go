@@ -30,15 +30,15 @@ func wireApp(confServer *conf.Server, confData *conf.Data, logger log.Logger) (*
 		return nil, nil, err
 	}
 	greeterRepo := data.NewGreeterRepo(dataData, logger)
-	greeterUsecase := biz.NewGreeterUsecase(greeterRepo, logger)
+	stockClient := data.NewStockClient()
+	greeterUsecase := biz.NewGreeterUsecase(greeterRepo, logger, stockClient)
 	greeterService := service.NewGreeterService(greeterUsecase)
-	grpcServer := server.NewGRPCServer(confServer, greeterService, logger)
 	httpServer := server.NewHTTPServer(confServer, greeterService, logger)
 	consumerRepo := data.NewConsumerRepo(dataData, logger)
 	consumerUsecase := biz.NewConsumerUsecase(consumerRepo, logger)
 	consumerService := service.NewConsumerService(logger, consumerUsecase)
 	asynqServer := server.NewAsynqServer(confData, logger, consumerService)
-	app := newApp(logger, grpcServer, httpServer, asynqServer)
+	app := newApp(logger, httpServer, asynqServer)
 	return app, func() {
 		cleanup()
 	}, nil

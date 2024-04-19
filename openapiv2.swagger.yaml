@@ -4,6 +4,7 @@ info:
   version: "1.0"
 tags:
   - name: Greeter
+  - name: Stock
 schemes:
   - http
   - https
@@ -33,6 +34,50 @@ paths:
           type: string
       tags:
         - hello-kratos
+  /stock/add:
+    post:
+      summary: 增加库存
+      operationId: Greeter_AddStock
+      responses:
+        "200":
+          description: A successful response.
+          schema:
+            type: object
+            properties: {}
+        default:
+          description: An unexpected error response.
+          schema:
+            $ref: '#/definitions/rpcStatus'
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/v1IncreaseStockRequest'
+      tags:
+        - stock
+  /stock/deduct:
+    post:
+      summary: 扣库存
+      operationId: Greeter_DeductStock
+      responses:
+        "200":
+          description: A successful response.
+          schema:
+            type: object
+            properties: {}
+        default:
+          description: An unexpected error response.
+          schema:
+            $ref: '#/definitions/rpcStatus'
+      parameters:
+        - name: body
+          in: body
+          required: true
+          schema:
+            $ref: '#/definitions/v1DeductStockRequest'
+      tags:
+        - stock
 definitions:
   protobufAny:
     type: object
@@ -53,12 +98,30 @@ definitions:
         items:
           type: object
           $ref: '#/definitions/protobufAny'
+  v1DeductStockRequest:
+    type: object
+    properties:
+      id:
+        type: string
+        format: int64
+      stock:
+        type: string
+        format: int64
   v1HelloReply:
     type: object
     properties:
       message:
         type: string
     title: The response message containing the greetings
+  v1IncreaseStockRequest:
+    type: object
+    properties:
+      id:
+        type: string
+        format: int64
+      stock:
+        type: string
+        format: int64
 securityDefinitions:
   TokenAuth:
     type: apiKey

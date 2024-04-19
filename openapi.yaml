@@ -26,8 +26,54 @@ paths:
                         application/json:
                             schema:
                                 $ref: '#/components/schemas/helloworld.v1.HelloReply'
+    /stock/add:
+        post:
+            tags:
+                - Greeter
+            description: 增加库存
+            operationId: Greeter_AddStock
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.stock.v1.IncreaseStockRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content: {}
+    /stock/deduct:
+        post:
+            tags:
+                - Greeter
+            description: 扣库存
+            operationId: Greeter_DeductStock
+            requestBody:
+                content:
+                    application/json:
+                        schema:
+                            $ref: '#/components/schemas/api.stock.v1.DeductStockRequest'
+                required: true
+            responses:
+                "200":
+                    description: OK
+                    content: {}
 components:
     schemas:
+        api.stock.v1.DeductStockRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                stock:
+                    type: string
+        api.stock.v1.IncreaseStockRequest:
+            type: object
+            properties:
+                id:
+                    type: string
+                stock:
+                    type: string
         helloworld.v1.HelloReply:
             type: object
             properties:

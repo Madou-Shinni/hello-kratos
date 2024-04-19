@@ -4,6 +4,8 @@ package helloworld.v1;
 
 import "google/api/annotations.proto";
 import "protoc-gen-openapiv2/options/annotations.proto";
+import "google/protobuf/empty.proto";
+import "stock/v1/stock.proto";
 
 option go_package = "helloword/api/helloworld/v1;v1";
 option java_multiple_files = true;
@@ -41,6 +43,32 @@ service Greeter {
     option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
       summary: "helloword";
       tags: ["hello-kratos"];
+    };
+  }
+
+  // 扣库存
+  rpc DeductStock (api.stock.v1.DeductStockRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/stock/deduct"
+      body: "*"
+    };
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "扣库存";
+      tags: ["stock"];
+    };
+  }
+
+  // 增加库存
+  rpc AddStock (api.stock.v1.IncreaseStockRequest) returns (google.protobuf.Empty) {
+    option (google.api.http) = {
+      post: "/stock/add"
+      body: "*"
+    };
+
+    option (grpc.gateway.protoc_gen_openapiv2.options.openapiv2_operation) = {
+      summary: "增加库存";
+      tags: ["stock"];
     };
   }
 }

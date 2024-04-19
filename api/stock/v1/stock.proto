@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package api.stock.v1;
+
+import "google/protobuf/empty.proto";
+
+option go_package = "helloword/api/stock/v1;v1";
+option java_multiple_files = true;
+option java_package = "api.stock.v1";
+
+service Stock {
+	rpc DeductStock (DeductStockRequest) returns (google.protobuf.Empty);
+	rpc IncreaseStock (IncreaseStockRequest) returns (google.protobuf.Empty);
+}
+
+message DeductStockRequest {
+	int64 id = 1;
+	int64 stock = 2;
+}
+
+message IncreaseStockRequest {
+	int64 id = 1;
+	int64 stock = 2;
+}

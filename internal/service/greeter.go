@@ -3,8 +3,10 @@ package service
 import (
 	"context"
 	"github.com/go-kratos/kratos/v2/errors"
+	"google.golang.org/protobuf/types/known/emptypb"
 
 	v1 "helloword/api/helloworld/v1"
+	stockV1 "helloword/api/stock/v1"
 	"helloword/internal/biz"
 )
 
@@ -28,4 +30,12 @@ func (s *GreeterService) SayHello(ctx context.Context, in *v1.HelloRequest) (*v1
 		return nil, err
 	}
 	return &v1.HelloReply{Message: "Hello " + g.Hello}, nil
+}
+
+func (s *GreeterService) DeductStock(ctx context.Context, req *stockV1.DeductStockRequest) (*emptypb.Empty, error) {
+	return nil, s.uc.DeductStock(ctx, req)
+}
+
+func (s *GreeterService) AddStock(ctx context.Context, req *stockV1.IncreaseStockRequest) (*emptypb.Empty, error) {
+	return nil, s.uc.AddStock(ctx, req)
 }
