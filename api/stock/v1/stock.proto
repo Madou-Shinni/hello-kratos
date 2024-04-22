@@ -11,6 +11,8 @@ option java_package = "api.stock.v1";
 service Stock {
 	rpc DeductStock (DeductStockRequest) returns (google.protobuf.Empty);
 	rpc IncreaseStock (IncreaseStockRequest) returns (google.protobuf.Empty);
+	rpc DeductIntegral (DeductIntegralRequest) returns (google.protobuf.Empty);
+	rpc IncreaseIntegral (IncreaseIntegralRequest) returns (google.protobuf.Empty);
 }
 
 message DeductStockRequest {
@@ -21,4 +23,14 @@ message DeductStockRequest {
 message IncreaseStockRequest {
 	int64 id = 1;
 	int64 stock = 2;
+}
+
+message DeductIntegralRequest {
+	int64 id = 1;
+	int64 Integral = 2;
+}
+
+message IncreaseIntegralRequest {
+	int64 id = 1;
+	int64 Integral = 2;
 }

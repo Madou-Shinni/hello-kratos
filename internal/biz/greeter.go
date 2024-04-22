@@ -56,9 +56,13 @@ func (uc *GreeterUsecase) CreateGreeter(ctx context.Context, g *Greeter) (*Greet
 
 func (uc *GreeterUsecase) DeductStock(ctx context.Context, req *stockV1.DeductStockRequest) error {
 	uc.log.Infof("DeductStock: %v", req)
+	integralReq := &stockV1.DeductIntegralRequest{
+		Integral: 3,
+	}
 	gid := dtmgrpc.MustGenGid(dtmServer)
 	saga := dtmgrpc.NewSagaGrpc(dtmServer, gid).
-		Add(stockServer+stockV1.Stock_DeductStock_FullMethodName, stockServer+stockV1.Stock_IncreaseStock_FullMethodName, req)
+		Add(stockServer+stockV1.Stock_DeductStock_FullMethodName, stockServer+stockV1.Stock_IncreaseStock_FullMethodName, req).
+		Add(stockServer+stockV1.Stock_DeductIntegral_FullMethodName, stockServer+stockV1.Stock_IncreaseIntegral_FullMethodName, integralReq)
 
 	saga.WaitResult = true
 	return saga.Submit()
