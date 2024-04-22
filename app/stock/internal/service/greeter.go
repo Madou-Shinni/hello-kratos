@@ -26,9 +26,9 @@ func NewGreeterService(uc *biz.GreeterUsecase) *GreeterService {
 
 func (s *GreeterService) DeductStock(ctx context.Context, req *stockV1.DeductStockRequest) (*emptypb.Empty, error) {
 	if stock < int(req.Stock) {
-		// 不重试
+		// 不重试，库存不足，不进行补偿
 		log.Info("库存不足: %v", stock)
-		return nil, errors.New(409, "库存不足", "库存不足")
+		return &emptypb.Empty{}, nil
 	}
 
 	// 重试
@@ -40,11 +40,11 @@ func (s *GreeterService) DeductStock(ctx context.Context, req *stockV1.DeductSto
 	// 扣减库存成功
 	stock -= int(req.Stock)
 	log.Info("扣减库存成功 :%v", stock)
-
-	return &emptypb.Empty{}, nil
+	// 发生错误 需要补偿
+	return nil, errors.New(409, "发生错误", "发生错误")
 }
 
-func (s *GreeterService) AddStock(ctx context.Context, req *stockV1.IncreaseStockRequest) (*emptypb.Empty, error) {
+func (s *GreeterService) IncreaseStock(ctx context.Context, req *stockV1.IncreaseStockRequest) (*emptypb.Empty, error) {
 	stock += int(req.Stock)
 	log.Infof("增加库存成功: %v", stock)
 	return nil, nil

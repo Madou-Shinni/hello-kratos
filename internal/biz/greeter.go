@@ -59,6 +59,8 @@ func (uc *GreeterUsecase) DeductStock(ctx context.Context, req *stockV1.DeductSt
 	gid := dtmgrpc.MustGenGid(dtmServer)
 	saga := dtmgrpc.NewSagaGrpc(dtmServer, gid).
 		Add(stockServer+stockV1.Stock_DeductStock_FullMethodName, stockServer+stockV1.Stock_IncreaseStock_FullMethodName, req)
+
+	saga.WaitResult = true
 	return saga.Submit()
 }
 
