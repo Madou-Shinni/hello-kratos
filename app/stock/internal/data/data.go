@@ -34,7 +34,7 @@ func NewDB(conf *conf.Data, logger log.Logger) *gorm.DB {
 	config.SkipDefaultTransaction = false
 	config.DisableForeignKeyConstraintWhenMigrating = true
 
-	dsn := "root:123456@tcp(127.0.0.1:3306)/kratos-im?parseTime=True&loc=Local"
+	dsn := "root:123456@tcp(127.0.0.1:3306)/test?parseTime=True&loc=Local"
 
 	db, err := gorm.Open(mysql.New(mysql.Config{
 		DSN:               dsn,

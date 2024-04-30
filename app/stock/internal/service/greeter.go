@@ -36,30 +36,26 @@ func (s *GreeterService) DeductStock(ctx context.Context, req *stockV1.DeductSto
 		return nil, err
 	}
 	begin := s.db.Begin()
-	if stock < int(req.Stock) {
-		// 不重试，库存不足，不进行补偿
-		log.Info("库存不足: %v", stock)
-		return nil, nil
-	}
 	err = grpc.Call(begin.Statement.ConnPool.(*sql.Tx), func(db *sql.Tx) error {
-		// 重试
-		if req.Stock > 10 {
-			log.Info("超时重试: %v", stock)
-			return errors.New(425, "超时", "超时")
+		if stock < int(req.Stock) {
+			// 不重试，库存不足，不进行补偿
+			log.Info("库存不足: %v", stock)
+			return errors.New(409, "发生错误", "发生错误")
 		}
 
 		// 扣减库存成功
 		stock -= int(req.Stock)
 		log.Info("扣减库存成功 :%v", stock)
 		// 发生错误 需要补偿
-		db.Commit()
-		return errors.New(409, "发生错误", "发生错误")
+		db.Exec("update stock set stock = stock - ? WHERE id = 1", req.Stock)
+		return nil
 	})
 	if err != nil {
+		log.Error("dtm error: %v", err.Error())
 		return nil, err
 	}
 
-	return nil, nil
+	return &emptypb.Empty{}, nil
 }
 
 func (s *GreeterService) IncreaseStock(ctx context.Context, req *stockV1.IncreaseStockRequest) (*emptypb.Empty, error) {
@@ -72,10 +68,10 @@ func (s *GreeterService) IncreaseStock(ctx context.Context, req *stockV1.Increas
 	grpc.Call(begin.Statement.ConnPool.(*sql.Tx), func(db *sql.Tx) error {
 		stock += int(req.Stock)
 		log.Infof("增加库存成功: %v", stock)
-		db.Commit()
+		db.Exec("update stock set stock = stock + ? WHERE id = 1", req.Stock)
 		return nil
 	})
-	return nil, nil
+	return &emptypb.Empty{}, nil
 }
 
 func (s *GreeterService) DeductIntegral(ctx context.Context, req *stockV1.DeductIntegralRequest) (*emptypb.Empty, error) {
@@ -89,25 +85,21 @@ func (s *GreeterService) DeductIntegral(ctx context.Context, req *stockV1.Deduct
 		if integral < int(req.Integral) {
 			// 不重试，积分不足，不进行补偿
 			log.Info("积分不足: %v", integral)
-			return nil
+			db.Rollback()
+			return errors.New(409, "发生错误", "发生错误")
 		}
 
-		// 重试
-		if req.Integral > 10 {
-			log.Info("超时重试: %v", integral)
-			return errors.New(425, "超时", "超时")
-		}
 		// 扣减积分成功
 		integral -= int(req.Integral)
 		log.Info("扣减积分成功 :%v", integral)
 		// 发生错误 需要补偿
-		db.Commit()
+		db.Exec("update integral set integral = integral - ? WHERE id = 1", req.Integral)
 		return errors.New(409, "发生错误", "发生错误")
 	})
 	if err != nil {
 		return nil, err
 	}
-	return nil, nil
+	return &emptypb.Empty{}, nil
 }
 
 func (s *GreeterService) IncreaseIntegral(ctx context.Context, req *stockV1.IncreaseIntegralRequest) (*emptypb.Empty, error) {
@@ -120,8 +112,8 @@ func (s *GreeterService) IncreaseIntegral(ctx context.Context, req *stockV1.Incr
 	grpc.Call(begin.Statement.ConnPool.(*sql.Tx), func(db *sql.Tx) error {
 		integral += int(req.Integral)
 		log.Infof("增加积分成功: %v", integral)
-		db.Commit()
+		db.Exec("update integral set integral = integral + ? WHERE id = 1", req.Integral)
 		return nil
 	})
-	return nil, nil
+	return &emptypb.Empty{}, nil
 }

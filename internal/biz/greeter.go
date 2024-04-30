@@ -65,7 +65,12 @@ func (uc *GreeterUsecase) DeductStock(ctx context.Context, req *stockV1.DeductSt
 		Add(stockServer+stockV1.Stock_DeductIntegral_FullMethodName, stockServer+stockV1.Stock_IncreaseIntegral_FullMethodName, integralReq)
 
 	saga.WaitResult = true
-	return saga.Submit()
+	err := saga.Submit()
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func (uc *GreeterUsecase) AddStock(ctx context.Context, req *stockV1.IncreaseStockRequest) error {
