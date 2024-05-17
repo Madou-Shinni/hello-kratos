@@ -45,9 +45,12 @@ func (s *GreeterService) DeductStock(ctx context.Context, req *stockV1.DeductSto
 
 		// 扣减库存成功
 		db.Exec("update stock set stock = stock - ? WHERE id = 1", req.Stock)
-		return nil
+		return errors.New(409, "发生错误", "发生错误")
+		//return nil
 	})
 	if err != nil {
+		s.db.Model(&model.Stock{}).First(&stock, 1)
+		log.Errorf("扣减库存发生错误: %v", stock.Stock)
 		return nil, err
 	}
 
