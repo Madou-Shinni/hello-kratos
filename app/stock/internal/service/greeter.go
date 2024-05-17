@@ -11,10 +11,8 @@ import (
 	stockV1 "helloword/api/stock/v1"
 	v1 "helloword/api/stock/v1"
 	"helloword/app/stock/internal/biz"
+	"helloword/model"
 )
-
-var stock = 20
-var integral = 20
 
 // GreeterService is a greeter service.
 type GreeterService struct {
@@ -32,28 +30,29 @@ func NewGreeterService(uc *biz.GreeterUsecase, db *gorm.DB) *GreeterService {
 func (s *GreeterService) DeductStock(ctx context.Context, req *stockV1.DeductStockRequest) (*emptypb.Empty, error) {
 	grpc, err := dtmgrpc.BarrierFromGrpc(ctx)
 	if err != nil {
-		log.Error("dtm error: %v", err)
+		log.Errorf("dtm error: %v", err)
 		return nil, err
 	}
 	begin := s.db.Begin()
+	var stock model.Stock
 	err = grpc.Call(begin.Statement.ConnPool.(*sql.Tx), func(db *sql.Tx) error {
-		if stock < int(req.Stock) {
+		s.db.First(&stock, 1)
+		if stock.Stock < int(req.Stock) {
 			// 不重试，库存不足，不进行补偿
-			log.Info("库存不足: %v", stock)
+			log.Infof("库存不足: %v", stock.Stock)
 			return errors.New(409, "发生错误", "发生错误")
 		}
 
 		// 扣减库存成功
-		stock -= int(req.Stock)
-		log.Info("扣减库存成功 :%v", stock)
-		// 发生错误 需要补偿
 		db.Exec("update stock set stock = stock - ? WHERE id = 1", req.Stock)
 		return nil
 	})
 	if err != nil {
-		log.Error("dtm error: %v", err.Error())
 		return nil, err
 	}
+
+	s.db.First(&stock, 1)
+	log.Infof("扣减库存成功: %v", stock.Stock)
 
 	return &emptypb.Empty{}, nil
 }
@@ -61,16 +60,19 @@ func (s *GreeterService) DeductStock(ctx context.Context, req *stockV1.DeductSto
 func (s *GreeterService) IncreaseStock(ctx context.Context, req *stockV1.IncreaseStockRequest) (*emptypb.Empty, error) {
 	grpc, err := dtmgrpc.BarrierFromGrpc(ctx)
 	if err != nil {
-		log.Error("dtm error: %v", err)
+		log.Errorf("dtm error: %v", err)
 		return nil, err
 	}
 	begin := s.db.Begin()
 	grpc.Call(begin.Statement.ConnPool.(*sql.Tx), func(db *sql.Tx) error {
-		stock += int(req.Stock)
-		log.Infof("增加库存成功: %v", stock)
 		db.Exec("update stock set stock = stock + ? WHERE id = 1", req.Stock)
 		return nil
 	})
+
+	var stock model.Stock
+	s.db.First(&stock, 1)
+	log.Infof("增加库存成功: %v", stock.Stock)
+
 	return &emptypb.Empty{}, nil
 }
 
@@ -81,39 +83,47 @@ func (s *GreeterService) DeductIntegral(ctx context.Context, req *stockV1.Deduct
 		return nil, err
 	}
 	begin := s.db.Begin()
+	var integral model.Integral
 	err = grpc.Call(begin.Statement.ConnPool.(*sql.Tx), func(db *sql.Tx) error {
-		if integral < int(req.Integral) {
-			// 不重试，积分不足，不进行补偿
-			log.Info("积分不足: %v", integral)
-			db.Rollback()
+		s.db.First(&integral, 1)
+		if integral.Integral < int(req.Integral) {
+			// 不重试，积分不足
+			log.Infof("积分不足: %v", integral)
 			return errors.New(409, "发生错误", "发生错误")
 		}
 
-		// 扣减积分成功
-		integral -= int(req.Integral)
-		log.Info("扣减积分成功 :%v", integral)
-		// 发生错误 需要补偿
+		// 扣减积分
 		db.Exec("update integral set integral = integral - ? WHERE id = 1", req.Integral)
-		return errors.New(409, "发生错误", "发生错误")
+		//return errors.New(409, "发生错误", "发生错误")
+		return nil
 	})
 	if err != nil {
+		var first model.Integral
+		s.db.Model(&model.Integral{}).First(&first, 1)
+		log.Errorf("扣减积分发生错误: %v", first.Integral)
 		return nil, err
 	}
+
+	s.db.First(&integral, 1)
+	log.Infof("扣减积分成功: %v", integral.Integral)
+
 	return &emptypb.Empty{}, nil
 }
 
 func (s *GreeterService) IncreaseIntegral(ctx context.Context, req *stockV1.IncreaseIntegralRequest) (*emptypb.Empty, error) {
 	grpc, err := dtmgrpc.BarrierFromGrpc(ctx)
 	if err != nil {
-		log.Error("dtm error: %v", err)
+		log.Errorf("dtm error: %v", err)
 		return nil, err
 	}
 	begin := s.db.Begin()
 	grpc.Call(begin.Statement.ConnPool.(*sql.Tx), func(db *sql.Tx) error {
-		integral += int(req.Integral)
-		log.Infof("增加积分成功: %v", integral)
 		db.Exec("update integral set integral = integral + ? WHERE id = 1", req.Integral)
 		return nil
 	})
+
+	var integral model.Integral
+	s.db.First(&integral, 1)
+	log.Infof("增加积分成功: %v", integral.Integral)
 	return &emptypb.Empty{}, nil
 }
